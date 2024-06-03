@@ -25,7 +25,6 @@ const cardRoutes=require("./routes/card.js")
 // All Middlewares
 const app = express();
 
-app.use(cors());
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser())
@@ -41,6 +40,10 @@ app.use(express.urlencoded({ extended: false }));
 // app.use(passport.session());
 // app.use(passport.initialize());
 
+//public Files
+app.use(express.static(__dirname + '/public'));
+//cors 
+app.use(cors({ origin: "*", credentials: true }));
 
 app.use('/api/v1/auth', authRoutes);
 app.use("/api/v1/plan",userPlanRoutes);
