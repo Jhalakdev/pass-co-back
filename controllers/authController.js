@@ -245,6 +245,47 @@ exports.forgetPassword = async (req, res) => {
   }
 }
 
+//Resend -otp
+exports.resendOtp = async (req, res) => {
+  try {
+    const { emailorphone } = req.body;
+    const isEmail = validateEmail(emailorphone);
+    const isPhone = validatePhone(emailorphone);
+
+    if (!isEmail && !isPhone) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Email or Phone Number",
+      });
+    }
+
+    const user = isEmail
+      ? await User.findOne({ email: emailorphone })
+      : await User.findOne({ mobile: emailorphone });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: isEmail ? "Email Not Found" : "Mobile Number Not Found",
+      });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    if (isEmail) {
+      user.emailotp = otp;
+      await user.save();
+      await sendForgotPasswordEmail(emailorphone, otp, res);
+    } else {
+      user.mobileotp = otp
+      await user.save();
+      await sendForgetPasswordOtp(emailorphone, otp);
+      return res.status(201).json({
+        message: "Otp send to your mobile number"
+      })
+    }
+  } catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}
+
 //Verify Email or phoneotp for forget Password
 
 exports.verfyemailorphonecode = async (req, res) => {
