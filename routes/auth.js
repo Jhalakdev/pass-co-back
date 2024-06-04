@@ -8,7 +8,7 @@ router.post("/signup",authController.signupUser)
 router.post("/login",authController.loginUser)
 router.get("/logout",userAuth,authController.logoutUser);
 
-router.get("/forget-password",authController.forgetPassword)
+router.post("/forget-password",authController.forgetPassword);
 router.put("/verifyOtp",authController.verfyemailorphonecode);
 router.put("/reset-password",authController.resetPassword);
 
