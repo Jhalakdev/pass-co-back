@@ -33,6 +33,15 @@ exports.createPassword = async (req, res) => {
         }
 
         const user = await User.findById(userId);
+        if(user.plan.planType=="FREE")
+            {
+                if (user.passwordStorage.total >= 10) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Your Password Limit is exceeded. Switch to Another Plan."
+                    });
+                }   
+            }else{
         const plan = await Plan.findById(user.plan.planId);
 
         if (user.passwordStorage.total >= plan.passwordLimit) {
@@ -41,7 +50,7 @@ exports.createPassword = async (req, res) => {
                 message: "Your Password Limit is exceeded. Switch to Another Plan."
             });
         }
-
+    }
         const hashedPassword = await HashManager.encrypt(password);
         const passwordStorage = await PassKey.create({
             companyName: companyExist.name,
