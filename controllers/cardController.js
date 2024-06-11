@@ -128,7 +128,7 @@ exports.getACard = async (req, res) => {
 
 exports.deleteCard = async (req, res) => {
     try {
-        const cardId = req.params.cardId;
+        const cardId = req.params.id;
         const deletedCard = await Card.findByIdAndDelete(cardId);
 
         if (!deletedCard) {
