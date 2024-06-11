@@ -149,29 +149,35 @@ exports.selectPlan = async (req, res) => {
         await order.save();
 
         // Create a Stripe Checkout Session
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'payment',
-            line_items: [{
-                price_data: {
-                    currency: 'usd',
-                    product_data: {
-                        name: plan.name,
-                    },
-                    unit_amount: plan.cost * 100, // amount in cents
-                },
-                quantity: 1,
-            }],
-            success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-            metadata: {
-                orderId: order._id.toString()
-            },
-        });
-
+        // const session = await stripe.checkout.sessions.create({
+        //     payment_method_types: ['card'],
+        //     mode: 'payment',
+        //     line_items: [{
+        //         price_data: {
+        //             currency: 'usd',
+        //             product_data: {
+        //                 name: plan.name,
+        //             },
+        //             unit_amount: plan.cost * 100, // amount in cents
+        //         },
+        //         quantity: 1,
+        //     }],
+        //     success_url: `${process.env.FRONTEND_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        //     cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        //     metadata: {
+        //         orderId: order._id.toString()
+        //     },
+        // });
+        const paymentIntent=await stripe.paymentIntents.create({
+            amount:plan.cost,
+            currency:'usd',
+            automatic_payment_methods:{
+                enabled:true
+            }
+        })
         return res.status(200).json({
             success: true,
-            sessionId: session.id
+            paymentIntent:paymentIntent.client_secret
         });
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
