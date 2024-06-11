@@ -163,7 +163,8 @@ exports.selectPlan = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            paymentIntent: paymentIntent.client_secret
+            paymentIntent: paymentIntent.client_secret;
+            paymentIntentId: paymentIntent.id
         });
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
