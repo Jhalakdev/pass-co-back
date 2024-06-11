@@ -169,7 +169,7 @@ exports.selectPlan = async (req, res) => {
         //     },
         // });
         const paymentIntent=await stripe.paymentIntents.create({
-            amount:plan.cost,
+            amount:plan.cost*100,
             currency:'usd',
             automatic_payment_methods:{
                 enabled:true
