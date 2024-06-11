@@ -1,10 +1,12 @@
 const express=require("express");
 const { userAuth } = require("../middlewares/authMiddleware");
-const cradController=require("../controllers/cardController")
+const cardController=require("../controllers/cardController");
 const router=express.Router();
 
-router.post("/add-card",userAuth,cradController.addCard);
-router.get("/",userAuth,cradController.getCards);
-router.get("/:id",userAuth,cradController.getACards);
+router.post("/add-card",userAuth,cardController.addCard);
+router.get("/",userAuth,cardController.getCards);
+router.get("/:id",userAuth,cardController.getACard);
+
+router.delete("/:id",userAuth,cardController.deleteCard);
 
 module.exports=router
