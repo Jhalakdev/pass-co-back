@@ -163,7 +163,7 @@ exports.selectPlan = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            paymentIntent: paymentIntent.client_secret;
+            paymentIntent: paymentIntent.client_secret,
             paymentIntentId: paymentIntent.id
         });
     } catch (err) {
