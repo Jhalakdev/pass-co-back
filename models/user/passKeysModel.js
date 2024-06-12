@@ -1,6 +1,11 @@
 const mongoose=require("mongoose")
 
 const passKeyModel=new mongoose.Schema({
+    userId:{
+        type:mongoose.Types.ObjectId,
+        ref:"User",
+        required:true,
+    },
     companyName:{
        type:String
     },
