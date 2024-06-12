@@ -45,6 +45,7 @@ exports.createPassword = async (req, res) => {
 
         const hashedPassword = await HashManager.encrypt(password);
         const passwordStorage = await PassKey.create({
+            userId,
             companyName: companyExist.name,
             username,
             email,
