@@ -333,3 +333,31 @@ exports.fileShare = async (req, res) => {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
+
+exports.myPlan=async(req,res)=>{
+    try{
+        const userId=req.user._id;
+        const user=await User.findById(userId);
+        const planType=user.plan.planType;
+        if(planType==='FREE')
+            {
+                return res.status(201).json({
+                    succes:true,
+                    message:"You Are in Free Plan"
+                })
+            }
+        const plan=await Plan.findById(user.plan.planId).select('-user');
+        if(!plan){
+            return res.status(401).json({
+                succes:false,
+                message:"Currently you are in no Plan"
+            })
+        }
+        return res.status(201).json({
+            succes:true,
+            data:plan
+        })
+    }catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+}
