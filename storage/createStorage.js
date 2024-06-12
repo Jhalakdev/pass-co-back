@@ -154,7 +154,6 @@ exports.handleFileUpload = async (file,folder) => {
     const url = `https://storage.bunnycdn.com/${process.env.BUNNY_ZONE_NAME}/${subdirectory}/${uniqueFilename}`;
     const publicUrl = `https://${process.env.BUNNY_PULL_ZONE_NAME}.b-cdn.net/${subdirectory}/${uniqueFilename}`;
     const fileContent = fs.readFileSync(file.path);
-    console.log(url)
     try {
       const response = await axios.put(url, fileContent, {
         headers: {
@@ -251,7 +250,6 @@ exports.handleFileUpload = async (file,folder) => {
 //   };
 exports.getTotalStorage = async (storageZoneName, path = '/') => {
     try {
-        console.log(storageZoneName,typeof(storageZoneName))
         const response = await axios.get(`https://storage.bunnycdn.com/${storageZoneName}${path}`, {
             headers: {
                 'AccessKey': "10457531-1fe8-446e-8c74bf1fbad4-95b1-40ca"

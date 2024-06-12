@@ -11,8 +11,18 @@ exports.getMyFileManager=async(req,res)=>{
             {
                 const plan=await Plan.findById(user.plan.planId);
                 const files=await File.findOne({userId});
+               
                 const usedSpace=user.plan.usedSpace;
                 const allocatedSpace=await helper.formatFileSize(plan.allocatedSpace);
+                if(!files)
+                    {
+                        return res.status(201).json({
+                            succes:true,
+                            usedSpace:0,
+                            allocatedSpace,
+                            file:[]
+                        })
+                    }
                 return res.status(201).json({
                     succes:true,
                     usedSpace,

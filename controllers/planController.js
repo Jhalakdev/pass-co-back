@@ -2,7 +2,8 @@ const Plan = require("../models/admin/planModel");
 const User = require("../models/user/userModel");
 const Order = require("../models/user/orderModel");
 const helper = require("../helper/helper");
-const { createFolder, checkFolderExists } = require("../storage/createStorage");
+const File=require("../models/user/fileModel")
+const { createFolder, checkFolderExists, handleFileUpload, getTotalStorage } = require("../storage/createStorage");
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // exports.selectPlan = async (req, res) => {
@@ -163,8 +164,7 @@ exports.selectPlan = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            paymentIntent: paymentIntent.client_secret,
-            paymentIntentId: paymentIntent.id
+            paymentIntent: paymentIntent.client_secret
         });
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
@@ -175,6 +175,7 @@ exports.paymentSuccess = async (req, res) => {
         const { paymentIntentId } = req.body; 
 
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        console.log(paymentIntent)
         if (paymentIntent.status !== 'succeeded') {
             return res.status(400).json({
                 success: false,
@@ -257,14 +258,17 @@ exports.paymentSuccess = async (req, res) => {
 
 exports.fileShare = async (req, res) => {
     try {
+        
         const userId = req.user._id;
         const user = await User.findById(userId);
         const plan = await Plan.findById(user.plan.planId);
-
-        const userUsedSpace = await helper.convertToBytes(user.plan.usedSpace);
+        let userUsedSpace=0;
+        if(user.plan.usedSpace!=0){
+             userUsedSpace = await helper.convertToBytes(user.plan.usedSpace);
+        }
         const allocatedSpace = plan.allocatedSpace;
         const availableSpace = allocatedSpace - userUsedSpace;
-
+ 
         if (!user.fileshare) {
             return res.status(400).json({
                 success: false,
@@ -294,7 +298,6 @@ exports.fileShare = async (req, res) => {
                 message: "Your Storage is full"
             });
         }
-
         const file = await handleFileUpload(filepath, userId);
         if (!file) {
             return res.status(400).json({
@@ -333,6 +336,7 @@ exports.fileShare = async (req, res) => {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
+
 
 exports.myPlan=async(req,res)=>{
     try{
