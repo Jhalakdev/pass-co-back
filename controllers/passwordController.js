@@ -4,6 +4,7 @@ const User = require("../models/user/userModel");
 const PassKey = require("../models/user/passKeysModel");
 const Company = require("../models/admin/companyModel");
 const HashManager = require("../utils/HashManager");
+const mongoose=require("mongoose")
 
 exports.createPassword = async (req, res) => {
     try {
@@ -33,15 +34,6 @@ exports.createPassword = async (req, res) => {
         }
 
         const user = await User.findById(userId);
-        if(user.plan.planType=="FREE")
-            {
-                if (user.passwordStorage.total >= 10) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Your Password Limit is exceeded. Switch to Another Plan."
-                    });
-                }   
-            }else{
         const plan = await Plan.findById(user.plan.planId);
 
         if (user.passwordStorage.total >= plan.passwordLimit) {
@@ -50,7 +42,7 @@ exports.createPassword = async (req, res) => {
                 message: "Your Password Limit is exceeded. Switch to Another Plan."
             });
         }
-    }
+
         const hashedPassword = await HashManager.encrypt(password);
         const passwordStorage = await PassKey.create({
             companyName: companyExist.name,
@@ -195,3 +187,32 @@ exports.getAllPasswords = async (req, res) => {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
+
+
+
+exports.searchPasswords = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { companyName, username, email } = req.query;
+
+        // Initialize the query object
+        const query = {
+            userId: new mongoose.Types.ObjectId(userId),
+        };
+        // Add optional filters
+        if (companyName) query.companyName = { $regex: companyName, $options: "i" };
+        if (username) query.username = { $regex: username, $options: "i" };
+        if (email) query.email = { $regex: email, $options: "i" };
+
+        const passwords = await PassKey.find(query).exec();
+
+        return res.status(200).json({
+            success: true,
+            data: passwords,
+        });
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+};
+
+
