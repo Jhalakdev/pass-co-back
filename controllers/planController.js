@@ -243,7 +243,7 @@ exports.selectPlan = async (req, res) => {
         });
 
         await order.save();
-
+        amount = Math.ceil(amount);
         // Create a Stripe Payment Intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100, // amount in cents
