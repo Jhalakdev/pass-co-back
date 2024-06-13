@@ -27,7 +27,7 @@ exports.getMyFileManager=async(req,res)=>{
                     succes:true,
                     usedSpace,
                     allocatedSpace,
-                    file:files.file
+                    file:files.files
                 })
             }
         else{
