@@ -271,7 +271,7 @@ exports.selectPlan = async (req, res) => {
 exports.paymentSuccess = async (req, res) => {
     try {
         const { paymentIntentId } = req.body; 
-
+        console.log(paymentIntentId)
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
         console.log(paymentIntent)
         if (paymentIntent.status !== 'succeeded') {
