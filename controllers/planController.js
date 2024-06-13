@@ -2,9 +2,79 @@ const Plan = require("../models/admin/planModel");
 const User = require("../models/user/userModel");
 const Order = require("../models/user/orderModel");
 const helper = require("../helper/helper");
-const File=require("../models/user/fileModel")
+const File=require("../models/user/fileModel");
+const Coupon=require("../models/admin/coupenModel");
 const { createFolder, checkFolderExists, handleFileUpload, getTotalStorage } = require("../storage/createStorage");
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+exports.applyCoupon = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { planId, couponId } = req.body;
+
+        // Validate the plan
+        const plan = await Plan.findById(planId);
+        if (!plan) {
+            return res.status(401).json({
+                success: false,
+                message: "Plan does not exist"
+            });
+        }
+
+        // Validate the coupon
+        const coupon = await Coupon.findById(couponId);
+        if (!coupon) {
+            return res.status(401).json({
+                success: false,
+                message: "Coupon not valid"
+            });
+        }
+
+        // Check if the coupon is expired
+        const now = new Date();
+        if (coupon.expiryIn < now) {
+            return res.status(401).json({
+                success: false,
+                message: "Coupon has expired"
+            });
+        }
+
+        const discount = (plan.cost * coupon.discount) / 100;
+        const discountedPrice = plan.cost - discount;
+
+        res.status(200).json({
+            success: true,
+            message: "Coupon applied successfully",
+            discountedPrice: discountedPrice
+        });
+
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+};
+
+exports.removeCoupon = async (req, res) => {
+    try {
+        const { planId } = req.body;
+
+        const plan = await Plan.findById(planId);
+        if (!plan) {
+            return res.status(401).json({
+                success: false,
+                message: "Plan does not exist"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Coupon removed successfully",
+            originalPrice: plan.cost
+        });
+
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+};
 
 // exports.selectPlan = async (req, res) => {
 //     try {
@@ -109,11 +179,14 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 //         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
 //     }
 // };
+
 exports.selectPlan = async (req, res) => {
     try {
-        const planId = req.params.id;
+        
         const userId = req.user._id;
+        const { planId,couponId } = req.body;
 
+        // Validate user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
@@ -122,6 +195,7 @@ exports.selectPlan = async (req, res) => {
             });
         }
 
+        // Validate plan
         const plan = await Plan.findById(planId);
         if (!plan) {
             return res.status(400).json({
@@ -134,15 +208,36 @@ exports.selectPlan = async (req, res) => {
         if (plan.user.includes(userId)) {
             return res.status(400).json({
                 success: false,
-                message: "You are already in this plan"
+                message: "You are already subscribed to this plan"
             });
+        }
+
+        // Validate and apply coupon
+        let amount = plan.cost;
+        if (couponId) {
+            const coupon = await Coupon.findById(couponId);
+            if (!coupon) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid coupon"
+                });
+            }
+            const now = new Date();
+            if (coupon.expiryIn < now) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Coupon has expired"
+                });
+            }
+            const discount = (plan.cost * coupon.discount) / 100;
+            amount = plan.cost - discount;
         }
 
         // Create an order with 'pending' payment status
         const order = new Order({
             userId: userId,
             planId: planId,
-            amount: plan.cost,
+            amount: amount,
             currency: 'usd',
             paymentStatus: 'pending'
         });
@@ -151,7 +246,7 @@ exports.selectPlan = async (req, res) => {
 
         // Create a Stripe Payment Intent
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: plan.cost * 100, // amount in cents
+            amount: amount * 100, // amount in cents
             currency: 'usd',
             automatic_payment_methods: {
                 enabled: true
@@ -165,12 +260,13 @@ exports.selectPlan = async (req, res) => {
         return res.status(200).json({
             success: true,
             paymentIntent: paymentIntent.client_secret,
-            paymentIntentId:paymentIntent.id
+            paymentIntentId: paymentIntent.id
         });
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
+
 
 exports.paymentSuccess = async (req, res) => {
     try {
@@ -257,6 +353,87 @@ exports.paymentSuccess = async (req, res) => {
     }
 };
 
+
+// exports.fileShare = async (req, res) => {
+//     try {
+        
+//         const userId = req.user._id;
+//         const user = await User.findById(userId);
+//         const plan = await Plan.findById(user.plan.planId);
+//         let userUsedSpace=0;
+//         if(user.plan.usedSpace!=0){
+//              userUsedSpace = await helper.convertToBytes(user.plan.usedSpace);
+//         }
+//         const allocatedSpace = plan.allocatedSpace;
+//         const availableSpace = allocatedSpace - userUsedSpace;
+ 
+//         if (!user.fileshare) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "You Are Not Allowed to share File"
+//             });
+//         }
+
+//         if (availableSpace <= 0) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Your Storage is full"
+//             });
+//         }
+
+//         const filepath = req.files[0];
+//         if (!filepath) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "No file uploaded"
+//             });
+//         }
+
+//         const fileSize = filepath.size;
+//         if (fileSize > availableSpace) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Your Storage is full"
+//             });
+//         }
+//         const file = await handleFileUpload(filepath, userId);
+//         if (!file) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "File upload failed"
+//             });
+//         }
+
+//         let userFile = await File.findOne({ userId });
+//         if (userFile) {
+//             userFile.file.push(file);
+//             await userFile.save();
+//         } else {
+//             userFile = await File.create({ userId, file: [file] });
+//             await userFile.save();
+//         }
+
+//         const totalSpaceUsed = await getTotalStorage(process.env.BUNNY_ZONE_NAME);
+//         const folderSize = totalSpaceUsed.folderSizes[userId]; // Get folder size in MB, GB, TB, KB
+//         const folderSizeByte = await helper.convertToBytes(folderSize);
+//         const availableSpaceByte = allocatedSpace - folderSizeByte;
+
+//         user.plan.usedSpace = folderSize;
+//         plan.usedSpace = await helper.formatFileSize(totalSpaceUsed.totalSizeBytes);
+//         plan.availableSpace = await helper.formatFileSize(availableSpaceByte);
+
+//         await user.save();
+//         await plan.save();
+
+//         return res.status(201).json({
+//             success: true,
+//             message: "File Stored Successfully"
+//         });
+
+//     } catch (err) {
+//         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+//     }
+// };
 
 exports.fileShare = async (req, res) => {
     try {
