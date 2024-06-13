@@ -77,32 +77,57 @@ const userSchema = new Schema(
             default: ""
         },
         plan: {
-            planId:{
-                type:mongoose.Types.ObjectId,
-                ref:"Plan"
+            planId: {
+                type: mongoose.Types.ObjectId,
+                ref: "Plan"
             },
             planType: {
                 type: String,
                 default: "FREE"
             },
             createdIn: {
-                type: String,  // Change type to String to store formatted date
-                default: function() {
+                type: String,
+                default: function () {
                     return new Date().toISOString().split('T')[0];
                 }
             },
             expiresIn: {
-                type: String  // Change type to String to store formatted date
+                type: String
             },
-            usedSpace:{
-                type:String,
-                default:0
+            usedSpace: {
+                type: String,
+                default: 0
+            },
+            originalPlan: {
+                planId: {
+                    type: mongoose.Types.ObjectId,
+                    ref: "Plan",
+                    default: null
+                },
+                planType: {
+                    type: String,
+                    default: null
+                },
+                expiresIn: {
+                    type: String,
+                    default: null
+                }
             }
         },
         passwordStorage: {
             storage: [{
                 type: mongoose.Types.ObjectId,
                 ref: "PassKey"
+            }],
+            total: {
+                type: Number,
+                default: 0
+            }
+        },
+        familyAndFriends: {
+            members: [{
+                type: mongoose.Types.ObjectId,
+                ref: "User"
             }],
             total: {
                 type: Number,

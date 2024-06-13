@@ -1,7 +1,8 @@
 const express=require("express");
 const { userAuth } = require("../middlewares/authMiddleware");
 const {upload}=require("../middlewares/multerMiddleware")
-const planController=require("../controllers/planController")
+const planController=require("../controllers/planController");
+const familyFriendController=require("../controllers/friendsFamilyController");
 const router=express.Router();
 
 router.post("/select-plan",userAuth,planController.selectPlan);
@@ -13,5 +14,13 @@ router.post("/remove-coupon",userAuth,planController.removeCoupon);
 router.post("/payment-verify",userAuth,planController.paymentSuccess);
 
 router.get("/my-plan",userAuth,planController.myPlan);
+
+router.get("/search",userAuth,familyFriendController.searchUser);
+
+router.post("/add-user/:id",userAuth,familyFriendController.addUser);
+
+router.post("/verify-user",userAuth,familyFriendController.verifyOtpAndAddUser);
+
+router.post("/remove-user/:id",userAuth,familyFriendController.removeUser);
 
 module.exports=router
