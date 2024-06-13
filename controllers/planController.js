@@ -39,7 +39,7 @@ exports.applyCoupon = async (req, res) => {
             });
         }
 
-        const discount = (plan.cost * coupon.discount) / 100;
+        const discount = Math.ceil((plan.cost * coupon.discount) / 100);
         const discountedPrice = plan.cost - discount;
 
         res.status(200).json({
