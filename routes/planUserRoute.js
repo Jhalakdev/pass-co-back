@@ -4,7 +4,7 @@ const {upload}=require("../middlewares/multerMiddleware")
 const planController=require("../controllers/planController")
 const router=express.Router();
 
-router.post("/select-plan/:id",userAuth,planController.selectPlan);
+router.post("/select-plan",userAuth,planController.selectPlan);
 
 router.post("/upload",userAuth,upload.any("file"),planController.fileShare);
 
