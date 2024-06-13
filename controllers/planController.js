@@ -258,17 +258,18 @@ exports.paymentSuccess = async (req, res) => {
 
 exports.fileShare = async (req, res) => {
     try {
-        
         const userId = req.user._id;
         const user = await User.findById(userId);
         const plan = await Plan.findById(user.plan.planId);
-        let userUsedSpace=0;
-        if(user.plan.usedSpace!=0){
-             userUsedSpace = await helper.convertToBytes(user.plan.usedSpace);
+        let userUsedSpace = 0;
+
+        if (user.plan.usedSpace != 0) {
+            userUsedSpace = await helper.convertToBytes(user.plan.usedSpace);
         }
+
         const allocatedSpace = plan.allocatedSpace;
         const availableSpace = allocatedSpace - userUsedSpace;
- 
+
         if (!user.fileshare) {
             return res.status(400).json({
                 success: false,
@@ -283,23 +284,26 @@ exports.fileShare = async (req, res) => {
             });
         }
 
-        const filepath = req.files[0];
-        if (!filepath) {
+        const uploadedFile = req.files[0];
+        if (!uploadedFile) {
             return res.status(400).json({
                 success: false,
                 message: "No file uploaded"
             });
         }
 
-        const fileSize = filepath.size;
+        const fileSize = uploadedFile.size;
+        const fileName = uploadedFile.originalname;
+
         if (fileSize > availableSpace) {
             return res.status(400).json({
                 success: false,
                 message: "Your Storage is full"
             });
         }
-        const file = await handleFileUpload(filepath, userId);
-        if (!file) {
+
+        const filePath = await handleFileUpload(uploadedFile, userId);
+        if (!filePath) {
             return res.status(400).json({
                 success: false,
                 message: "File upload failed"
@@ -307,16 +311,23 @@ exports.fileShare = async (req, res) => {
         }
 
         let userFile = await File.findOne({ userId });
+        let filesizeConvert=await helper.formatFileSize(fileSize);
+        const newFileData = {
+            path: filePath,
+            size: filesizeConvert,
+            name: fileName
+        };
+
         if (userFile) {
-            userFile.file.push(file);
+            userFile.files.push(newFileData);
             await userFile.save();
         } else {
-            userFile = await File.create({ userId, file: [file] });
+            userFile = await File.create({ userId, files: [newFileData] });
             await userFile.save();
         }
 
         const totalSpaceUsed = await getTotalStorage(process.env.BUNNY_ZONE_NAME);
-        const folderSize = totalSpaceUsed.folderSizes[userId]; // Get folder size in MB, GB, TB, KB
+        const folderSize = totalSpaceUsed.folderSizes[userId];
         const folderSizeByte = await helper.convertToBytes(folderSize);
         const availableSpaceByte = allocatedSpace - folderSizeByte;
 
@@ -331,11 +342,11 @@ exports.fileShare = async (req, res) => {
             success: true,
             message: "File Stored Successfully"
         });
-
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
+
 
 
 exports.myPlan=async(req,res)=>{

@@ -1,16 +1,25 @@
-const mongoose=require("mongoose")
+const mongoose = require("mongoose");
 
-const fileSchema=new mongoose.Schema({
-    userId:{
-        type:mongoose.Types.ObjectId,
-        ref:"User",
-        required:true
+const fileSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Types.ObjectId,
+        ref: "User",
+        required: true
     },
-    file:[{
-        type:String,
-        required:true
-    }],
+    files: [{
+        path: {
+            type: String,
+            required: true
+        },
+        size: {
+            type: String,
+            required: true
+        },
+        name: {
+            type: String,
+            required: true
+        }
+    }]
+}, { timestamps: true });
 
-},{timestamps:true})
-
-module.exports=mongoose.model("File",fileSchema)
+module.exports = mongoose.model("File", fileSchema);
