@@ -229,7 +229,7 @@ exports.selectPlan = async (req, res) => {
                     message: "Coupon has expired"
                 });
             }
-            const discount = (plan.cost * coupon.discount) / 100;
+            const discount = Math.ceil((plan.cost * coupon.discount) / 100);
             amount = plan.cost - discount;
         }
 
@@ -243,7 +243,7 @@ exports.selectPlan = async (req, res) => {
         });
 
         await order.save();
-        amount = Math.ceil(amount);
+       
         // Create a Stripe Payment Intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100, // amount in cents
