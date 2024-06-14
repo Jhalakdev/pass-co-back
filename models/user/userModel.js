@@ -79,7 +79,8 @@ const userSchema = new Schema(
         plan: {
             planId: {
                 type: mongoose.Types.ObjectId,
-                ref: "Plan"
+                ref: "Plan",
+                default:null
             },
             planType: {
                 type: String,
@@ -92,7 +93,8 @@ const userSchema = new Schema(
                 }
             },
             expiresIn: {
-                type: String
+                type: String,
+                default:null
             },
             usedSpace: {
                 type: String,
