@@ -13,6 +13,10 @@ router.post("/resend-otp",authController.resendOtp);
 router.put("/verifyOtp",authController.verfyemailorphonecode);
 router.put("/reset-password",authController.resetPassword);
 
-router.put("/change-password",userAuth,authController.changePassword)
+router.put("/change-password",userAuth,authController.changePassword);
+
+router.post("/profileImage",userAuth,upload.fields([
+    {name:"image",maxCount:1}
+]),authController.updateProfileImage)
 
 module.exports = router;

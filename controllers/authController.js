@@ -432,3 +432,34 @@ exports.changePassword = async (req, res) => {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 }
+
+exports.updateProfileImage=async(req,res)=>{
+  try{
+    const user=await User.findById(req?.user?._id);
+    if(req.files && req.files.image)
+      {
+        const avatarLocalPath = req.files?.image[0]?.path;
+        if(avatarLocalPath){
+          const avatar = await uploadOnCloudinary(avatarLocalPath)
+          if (!avatar) {
+            throw new ApiError(400, "Avatar file is required")
+          }
+          user.profilePhoto = avatar.url;
+        }
+      }
+      await user.save();
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+      res.status(201).json({
+        success: true,
+        data: user.profilePhoto,
+        message: "User Profile updated successfully",
+      });
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}
