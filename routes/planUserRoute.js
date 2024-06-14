@@ -15,12 +15,14 @@ router.post("/payment-verify",userAuth,planController.paymentSuccess);
 
 router.get("/my-plan",userAuth,planController.myPlan);
 
-router.get("/search",userAuth,familyFriendController.searchUser);
+router.post("/search",userAuth,familyFriendController.searchUser);
 
 router.post("/add-user/:id",userAuth,familyFriendController.addUser);
 
 router.post("/verify-user",userAuth,familyFriendController.verifyOtpAndAddUser);
 
 router.post("/remove-user/:id",userAuth,familyFriendController.removeUser);
+
+router.get("/family-members",userAuth,familyFriendController.getFamilyMember);
 
 module.exports=router

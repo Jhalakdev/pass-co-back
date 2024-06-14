@@ -23,7 +23,7 @@ const userSchema = new Schema(
             type: String,
             trim: true,
         },
-        profilePic: {
+        profilePhoto: {
             type: String,
         },
         mobile: {

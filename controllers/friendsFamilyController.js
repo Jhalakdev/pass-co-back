@@ -252,3 +252,27 @@ exports.removeUser = async (req, res) => {
     }
 };
 
+exports.getFamilyMember = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(userId).select('familyAndFriends').populate({
+            path: 'familyAndFriends.members',
+            select: 'name email mobile profilePhoto' // fields to populate
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "No User",
+                member: []
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            member: user.familyAndFriends
+        });
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+}
