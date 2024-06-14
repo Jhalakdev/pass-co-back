@@ -1,6 +1,7 @@
 const express = require('express');
 const { userAuth } = require('../middlewares/authMiddleware');
 const authController = require('../controllers/authController');
+const {upload}=require("../middlewares/multerMiddleware");
 const router = express.Router();
 
 //Registration

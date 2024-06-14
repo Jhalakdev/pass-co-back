@@ -3,7 +3,7 @@ const helper = require("../helper/helper");
 const HashManager = require("../utils/HashManager");
 const { sendForgotPasswordEmail } = require("../utils/SendMail");
 const { sendForgetPasswordOtp } = require("../utils/Twlio");
-
+const uploadOnCloudinary = require("../utils/cloudinary");
 function validateEmail(input) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(input);
