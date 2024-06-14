@@ -463,3 +463,23 @@ exports.updateProfileImage=async(req,res)=>{
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 }
+
+exports.getUser=async(req,res)=>{
+  try{
+    const userId=req?.user?._id;
+    const user=await User.findById(userId).select('name email mobile isBlocked fileshare plan passwordStorage token');
+    if(!user)
+      {
+        return res.status(401).json({
+          succes:false,
+          message:"Invalid Route"
+        })
+      }
+      return res.status(201).json({
+        succes:true,
+        data:user
+      })
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}

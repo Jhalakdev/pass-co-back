@@ -18,6 +18,8 @@ router.put("/change-password",userAuth,authController.changePassword);
 
 router.post("/profileImage",userAuth,upload.fields([
     {name:"image",maxCount:1}
-]),authController.updateProfileImage)
+]),authController.updateProfileImage);
+
+router.get("/",userAuth,authController.getUser);
 
 module.exports = router;
