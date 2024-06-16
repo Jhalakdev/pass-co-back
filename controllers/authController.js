@@ -142,7 +142,7 @@ exports.loginUser = async (req, res) => {
 
     const cookieOptions = {
       path: "/",
-      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+      // expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: true,
       sameSite: "None",
@@ -151,7 +151,7 @@ exports.loginUser = async (req, res) => {
     delete userData.password;
     return res
       .status(201)
-      .cookie("accessToken", accessToken, cookieOptions, { maxAge: 86400000 })
+      .cookie("accessToken", accessToken, cookieOptions)
       .json({
         success: true,
         accessToken,
