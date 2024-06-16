@@ -78,8 +78,8 @@ exports.signupUser = async (req, res) => {
     // Create user in MongoDB
     const user = await User.create({
       name,
-      email: isEmail ? emailorphone : undefined,
-      mobile: isPhone ? emailorphone : undefined,
+      email: isEmail ? emailorphone : null,
+      mobile: isPhone ? emailorphone : null,
       password: hashedPassword,
       terms: true,
     });
