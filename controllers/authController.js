@@ -467,7 +467,7 @@ exports.updateProfileImage=async(req,res)=>{
 exports.getUser=async(req,res)=>{
   try{
     const userId=req?.user?._id;
-    const user=await User.findById(userId).select('name email mobile isBlocked fileshare plan passwordStorage token');
+    const user=await User.findById(userId).select('name email mobile profilePhoto isBlocked fileshare plan passwordStorage token');
     if(!user)
       {
         return res.status(401).json({
