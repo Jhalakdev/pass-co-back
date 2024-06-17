@@ -23,6 +23,6 @@ router.post("/profileImage",userAuth,upload.fields([
 router.get("/",userAuth,authController.getUser);
 
 router.post("/auth/google",authController.googelLogin);
-router.post("/get-fcm",userAuth,authController.getFcmToken);
+
 
 module.exports = router;

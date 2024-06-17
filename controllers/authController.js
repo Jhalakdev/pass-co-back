@@ -4,7 +4,9 @@ const HashManager = require("../utils/HashManager");
 const { sendForgotPasswordEmail } = require("../utils/SendMail");
 const { sendForgetPasswordOtp } = require("../utils/Twlio");
 const uploadOnCloudinary = require("../utils/cloudinary");
-const {verifyGoogleToken}=require("../config/firebase")
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client('724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com');
+
 
 function validateEmail(input) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -447,7 +449,7 @@ exports.updateProfileImage=async(req,res)=>{
 exports.getUser=async(req,res)=>{
   try{
     const userId=req?.user?._id;
-    const user=await User.findById(userId).select('name email mobile profilePhoto isBlocked fileshare plan passwordStorage token');
+    const user=await User.findById(userId).select('name email mobile profilePhoto isBlocked fileshare plan passwordStorage token fcmToken');
     if(!user)
       {
         return res.status(401).json({
@@ -467,17 +469,14 @@ exports.getUser=async(req,res)=>{
 exports.googelLogin=async(req,res)=> {
   const { token } = req.body;
   try {
-    const decodedToken = await verifyGoogleToken(token);
-    const { email, name, picture, uid } = decodedToken;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: '724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com',
+  });
 
-    // Check if the email is already registered with custom email/password login
-    const existingEmailUser = await User.findOne({ email, uid: { $ne: uid } });
-    if (existingEmailUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already registered via custom email/password login",
-      });
-    }
+  const payload = ticket.getPayload();
+  const {name,email,sub,picture}=payload;
+    const uid=sub;
 
     let user = await User.findOne({ uid });
     if (!user) {
@@ -511,20 +510,6 @@ exports.googelLogin=async(req,res)=> {
   } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
-} 
-exports.getFcmToken=async(req,res)=>{
-  const { fcmToken } = req.body;
-  const userId = req.user._id;
-  try {
-    const user = await User.findById(userId);
-    if (user) {
-      user.fcmToken = fcmToken; // Save the FCM token in user document
-      await user.save();
-      res.status(200).send("FCM Token saved successfully.");
-    } else {
-      res.status(404).send("User not found.");
-    }
-  }catch (err) {
-    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
-  }
-}
+}  
+
+
