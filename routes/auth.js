@@ -22,7 +22,8 @@ router.post("/profileImage",userAuth,upload.fields([
 
 router.get("/",userAuth,authController.getUser);
 
-router.post("/auth/google",authController.googelLogin);
+router.post("/google/signup",authController.googleSignup);
+router.post("/google/login",authController.googleLogin);
 
 
 module.exports = router;

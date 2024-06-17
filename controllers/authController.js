@@ -466,7 +466,7 @@ exports.getUser=async(req,res)=>{
   }
 }
 
-exports.googelLogin=async(req,res)=> {
+exports.googleSignup=async(req,res)=> {
   const { token } = req.body;
   try {
     const ticket = await client.verifyIdToken({
@@ -478,7 +478,13 @@ exports.googelLogin=async(req,res)=> {
   const {name,email,sub,picture}=payload;
     const uid=sub;
 
-    let user = await User.findOne({ uid });
+    const user = await User.findOne({ email, uid: { $ne: uid } });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered via custom email/password login",
+      });
+    }
     if (!user) {
       user = new User({
         name,
@@ -505,7 +511,7 @@ exports.googelLogin=async(req,res)=> {
         success: true,
         accessToken,
         data: user,
-        message: "User Login Success",
+        message: "User Signup Success",
       });
   } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
@@ -513,3 +519,44 @@ exports.googelLogin=async(req,res)=> {
 }  
 
 
+exports.googleLogin=async(req,res)=> {
+  const { token } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: '724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com',
+  });
+
+  const payload = ticket.getPayload();
+  const {name,email,sub,picture}=payload;
+    const uid=sub;
+
+    let user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(401).json({
+        sucess:false,
+        message:"User Not Existed"
+      })
+      };
+    const { accessToken } = await generateAccessAndRefereshTokens(user._id);
+
+    const cookieOptions = {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    };
+
+    return res
+      .status(201)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .json({
+        success: true,
+        accessToken,
+        data: user,
+        message: "User Login Success",
+      });
+  } catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}  
