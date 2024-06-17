@@ -4,6 +4,8 @@ const HashManager = require("../utils/HashManager");
 const { sendForgotPasswordEmail } = require("../utils/SendMail");
 const { sendForgetPasswordOtp } = require("../utils/Twlio");
 const uploadOnCloudinary = require("../utils/cloudinary");
+const {verifyGoogleToken}=require("../config/firebase")
+
 function validateEmail(input) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(input);
@@ -74,7 +76,6 @@ exports.signupUser = async (req, res) => {
     } else if (isPhone) {
       await helper.verify.verifyPhone(emailorphone);
     }
-
     // Create user in MongoDB
     const user = await User.create({
       name,
@@ -84,10 +85,26 @@ exports.signupUser = async (req, res) => {
       terms: true,
     });
 
-    return res.status(201).json({
-      success: true,
-      message: "User registered successfully",
-    });
+    const { accessToken } = await generateAccessAndRefereshTokens(user._id);
+
+    const cookieOptions = {
+      path: "/",
+      // expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    };
+    const userData = { ...user.toObject({ getters: true }) };
+    delete userData.password;
+    return res
+      .status(201)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .json({
+        success: true,
+        accessToken,
+        data: userData,
+        message: "Signed Up Successfully",
+      });
   } catch (error) {
     return helper.sendError(
       error.statusCode || 500,
@@ -245,46 +262,8 @@ exports.forgetPassword = async (req, res) => {
   }
 }
 
-//Resend -otp
-exports.resendOtp = async (req, res) => {
-  try {
-    const { emailorphone } = req.body;
-    const isEmail = validateEmail(emailorphone);
-    const isPhone = validatePhone(emailorphone);
+//resend Otp
 
-    if (!isEmail && !isPhone) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid Email or Phone Number",
-      });
-    }
-
-    const user = isEmail
-      ? await User.findOne({ email: emailorphone })
-      : await User.findOne({ mobile: emailorphone });
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: isEmail ? "Email Not Found" : "Mobile Number Not Found",
-      });
-    }
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    if (isEmail) {
-      user.emailotp = otp;
-      await user.save();
-      await sendForgotPasswordEmail(emailorphone, otp, res);
-    } else {
-      user.mobileotp = otp
-      await user.save();
-      await sendForgetPasswordOtp(emailorphone, otp);
-      return res.status(201).json({
-        message: "Otp send to your mobile number"
-      })
-    }
-  } catch (err) {
-    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
-  }
-}
 
 //Verify Email or phoneotp for forget Password
 
@@ -464,6 +443,7 @@ exports.updateProfileImage=async(req,res)=>{
   }
 }
 
+
 exports.getUser=async(req,res)=>{
   try{
     const userId=req?.user?._id;
@@ -479,6 +459,61 @@ exports.getUser=async(req,res)=>{
         succes:true,
         data:user
       })
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}
+
+exports.googelLogin=async(req,res)=> {
+  const { token } = req.body;
+  try {
+    const decodedToken = await verifyGoogleToken(token);
+    const { email, name, picture, uid } = decodedToken;
+    
+    let user = await User.findOne({ uid });
+    if (!user) {
+      user = new User({
+        name,
+        email,
+        uid, 
+        profilePhoto: picture,
+      });
+      await user.save();
+    }
+    const { accessToken } = await generateAccessAndRefereshTokens(user._id);
+
+    const cookieOptions = {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    };
+    return res
+      .status(201)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .json({
+        success: true,
+        accessToken,
+        data: user,
+        message: "User Login Success",
+      });
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+} 
+
+exports.getFcmToken=async(req,res)=>{
+  const { fcmToken } = req.body;
+  const userId = req.user._id;
+  try {
+    const user = await User.findById(userId);
+    if (user) {
+      user.fcmToken = fcmToken; // Save the FCM token in user document
+      await user.save();
+      res.status(200).send("FCM Token saved successfully.");
+    } else {
+      res.status(404).send("User not found.");
+    }
   }catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
