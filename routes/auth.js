@@ -2,15 +2,15 @@ const express = require('express');
 const { userAuth } = require('../middlewares/authMiddleware');
 const authController = require('../controllers/authController');
 const {upload}=require("../middlewares/multerMiddleware");
+
 const router = express.Router();
 
 //Registration
-router.post("/signup",authController.signupUser)
-router.post("/login",authController.loginUser)
+router.post("/signup",authController.signupUser);
+router.post("/login",authController.loginUser);
 router.get("/logout",userAuth,authController.logoutUser);
 
 router.post("/forget-password",authController.forgetPassword);
-router.post("/resend-otp",authController.resendOtp);
 router.put("/verifyOtp",authController.verfyemailorphonecode);
 router.put("/reset-password",authController.resetPassword);
 
@@ -21,5 +21,9 @@ router.post("/profileImage",userAuth,upload.fields([
 ]),authController.updateProfileImage);
 
 router.get("/",userAuth,authController.getUser);
+
+
+router.post("/auth/google",authController.googelLogin);
+router.get("/get-fcm",userAuth,authController.getFcmToken);
 
 module.exports = router;
