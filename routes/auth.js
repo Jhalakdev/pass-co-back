@@ -24,6 +24,6 @@ router.get("/",userAuth,authController.getUser);
 
 
 router.post("/auth/google",authController.googelLogin);
-router.get("/get-fcm",userAuth,authController.getFcmToken);
+router.post("/get-fcm",userAuth,authController.getFcmToken);
 
 module.exports = router;
