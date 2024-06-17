@@ -469,18 +469,28 @@ exports.googelLogin=async(req,res)=> {
   try {
     const decodedToken = await verifyGoogleToken(token);
     const { email, name, picture, uid } = decodedToken;
-    
+
+    // Check if the email is already registered with custom email/password login
+    const existingEmailUser = await User.findOne({ email, uid: { $ne: uid } });
+    if (existingEmailUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered via custom email/password login",
+      });
+    }
+
     let user = await User.findOne({ uid });
     if (!user) {
       user = new User({
         name,
         email,
-        uid, 
+        uid,
         profilePhoto: picture,
       });
       await user.save();
     }
-    const { accessToken } = await generateAccessAndRefereshTokens(user._id);
+
+    const { accessToken } = await generateAccessAndRefreshTokens(user._id);
 
     const cookieOptions = {
       path: "/",
@@ -488,6 +498,7 @@ exports.googelLogin=async(req,res)=> {
       secure: true,
       sameSite: "None",
     };
+
     return res
       .status(201)
       .cookie("accessToken", accessToken, cookieOptions)
@@ -497,11 +508,10 @@ exports.googelLogin=async(req,res)=> {
         data: user,
         message: "User Login Success",
       });
-  }catch (err) {
+  } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 } 
-
 exports.getFcmToken=async(req,res)=>{
   const { fcmToken } = req.body;
   const userId = req.user._id;
