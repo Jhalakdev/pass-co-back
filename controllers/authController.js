@@ -467,18 +467,17 @@ exports.getUser=async(req,res)=>{
 }
 
 exports.googleSignup=async(req,res)=> {
-  const { token } = req.body;
+  let { token } = req.body;
   try {
-    const ticket = await client.verifyIdToken({
+    let ticket = await client.verifyIdToken({
       idToken: token,
       audience: '724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com',
   });
 
-  const payload = ticket.getPayload();
-  const {name,email,sub,picture}=payload;
-    const uid=sub;
+  let payload = ticket.getPayload();
+  let {name,email,sub,picture}=payload;
 
-    const user = await User.findOne({ email, uid: { $ne: uid } });
+    let user = await User.findOne({ email, uid: { $ne: sub } });
     if (user) {
       return res.status(400).json({
         success: false,
@@ -489,7 +488,7 @@ exports.googleSignup=async(req,res)=> {
       user = new User({
         name,
         email,
-        uid,
+        uid:sub,
         profilePhoto: picture,
       });
       await user.save();
