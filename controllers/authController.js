@@ -490,7 +490,7 @@ exports.googelLogin=async(req,res)=> {
       await user.save();
     }
 
-    const { accessToken } = await generateAccessAndRefreshTokens(user._id);
+    const { accessToken } = await generateAccessAndRefereshTokens(user._id);
 
     const cookieOptions = {
       path: "/",
