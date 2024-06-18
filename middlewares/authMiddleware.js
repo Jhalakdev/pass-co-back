@@ -43,11 +43,14 @@ exports.verifyToken = async (req, res, next) => {
 	const token = req.cookies?.accessToken || req.cookies?.adminToken || req.header("Authorization")?.replace("Bearer ", "");
 	if (!token) {
   
-			return res.json("Invalid Authorization,Token Not Found");
+			return res.status(401).json("Invalid Authorization,Token Not Found");
 	} else {
 		await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
 			if (err) {
-				console.log("Invalid Token or Token Expire");
+				return res.status(401).json({
+					success:false,
+					message:"Invalid Token or Token Expire"
+				})
 			} else {
 				return res.status(201).json({
 					success:true,
