@@ -568,9 +568,15 @@ exports.getFcmToken=async(req,res)=>{
     if (user) {
       user.fcmToken = fcmToken;
       await user.save();
-      res.status(200).send("FCM Token saved successfully.");
+      return res.status(200).json({
+        succes:true,
+        message:"FCM Token saved successfully"
+      });
     } else {
-      res.status(404).send("User not found.");
+      return res.status(404).json({
+        sucess:false,
+        message:"User not found."
+      })
     }
   }catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
