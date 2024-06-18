@@ -477,11 +477,11 @@ exports.googleSignup=async(req,res)=> {
   let payload = ticket.getPayload();
   let {name,email,sub,picture}=payload;
 
-    let user = await User.findOne({ email, uid: { $ne: sub } });
+    let user = await User.findOne({ email, uid:sub });
     if (user) {
       return res.status(400).json({
         success: false,
-        message: "Email already registered via custom email/password login",
+        message: "Email already registered",
       });
     }
     if (!user) {
@@ -559,3 +559,20 @@ exports.googleLogin=async(req,res)=> {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 }  
+
+exports.getFcmToken=async(req,res)=>{
+  const { fcmToken } = req.body;
+  const userId = req.user._id;
+  try {
+    const user = await User.findById(userId);
+    if (user) {
+      user.fcmToken = fcmToken;
+      await user.save();
+      res.status(200).send("FCM Token saved successfully.");
+    } else {
+      res.status(404).send("User not found.");
+    }
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}

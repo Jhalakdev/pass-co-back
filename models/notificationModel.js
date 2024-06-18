@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-
-
 const notificationSchema = new mongoose.Schema(
 	{
 		user: {
@@ -9,7 +7,10 @@ const notificationSchema = new mongoose.Schema(
 			ref: 'User',
 			required: true,
 		},
-
+		fcm:{
+			type:String,
+			require:true
+		},
 		title: {
 			type: String,
 			required: true,
