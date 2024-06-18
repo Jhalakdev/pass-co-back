@@ -5,6 +5,7 @@ const { sendForgotPasswordEmail } = require("../utils/SendMail");
 const { sendForgetPasswordOtp } = require("../utils/Twlio");
 const uploadOnCloudinary = require("../utils/cloudinary");
 const { OAuth2Client } = require('google-auth-library');
+const { sendNotification, notificationMessages } = require("../config/firebase");
 const client = new OAuth2Client('724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com');
 
 
@@ -393,6 +394,8 @@ exports.changePassword = async (req, res) => {
           { _id: user._id },
           { password: hashedpassword }
         );
+        const { title, message } = notificationMessages.changePassword;
+        await sendNotification(user?.fcmToken, title, message,res);
         res.status(201).json({
           success: true,
           message: "Password Changed Successfully"
@@ -435,6 +438,8 @@ exports.updateProfileImage=async(req,res)=>{
           message: "User not found",
         });
       }
+      const { title, message } = notificationMessages.profilePhotoUpdated;
+      await sendNotification(user?.fcmToken, title, message,res);
       res.status(201).json({
         success: true,
         data: user.profilePhoto,

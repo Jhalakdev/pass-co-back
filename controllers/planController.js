@@ -5,6 +5,7 @@ const helper = require("../helper/helper");
 const File=require("../models/user/fileModel");
 const Coupon=require("../models/admin/coupenModel");
 const { createFolder, checkFolderExists, handleFileUpload, getTotalStorage } = require("../storage/createStorage");
+const { notificationMessages, sendNotification } = require("../config/firebase");
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.applyCoupon = async (req, res) => {
@@ -341,7 +342,8 @@ exports.paymentSuccess = async (req, res) => {
         if (!folderExists) {
             await createFolder(storageZoneName, folderName, storageZonePassword);
         }
-
+        const { title, message } = notificationMessages.paymentSuccess;
+        await sendNotification(user?.fcmToken, title, message,res);
         return res.status(200).json({
             success: true,
             message: "Payment successful and plan updated"
