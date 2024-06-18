@@ -38,3 +38,22 @@ exports.isAdmin = async (req, res, next) => {
 			.json({ success: false, message: `User Role Can't be Verified` });
 	}
 };
+
+exports.verifyToken = async (req, res, next) => {
+	const token = req.cookies?.accessToken || req.cookies?.adminToken || req.header("Authorization")?.replace("Bearer ", "");
+	if (!token) {
+  
+			return res.json("Invalid Authorization,Token Not Found");
+	} else {
+		await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+			if (err) {
+				console.log("Invalid Token or Token Expire");
+			} else {
+				return res.status(201).json({
+					success:true,
+					message:"Valid Token"
+				})
+			}
+		});
+	}
+  };

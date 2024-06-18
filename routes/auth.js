@@ -1,5 +1,5 @@
 const express = require('express');
-const { userAuth } = require('../middlewares/authMiddleware');
+const { userAuth, verifyToken } = require('../middlewares/authMiddleware');
 const authController = require('../controllers/authController');
 const {upload}=require("../middlewares/multerMiddleware");
 
@@ -21,6 +21,7 @@ router.post("/profileImage",userAuth,upload.fields([
 ]),authController.updateProfileImage);
 
 router.get("/",userAuth,authController.getUser);
+router.get("/tokenverification",verifyToken);
 
 router.post("/google/signup",authController.googleSignup);
 router.post("/google/login",authController.googleLogin);
