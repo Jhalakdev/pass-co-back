@@ -305,6 +305,8 @@ exports.paymentSuccess = async (req, res) => {
             });
         }
 
+        user.paymentHistory.push(order._id);
+
         const plan = await Plan.findById(planId);
         if (!plan) {
             return res.status(404).json({
