@@ -180,15 +180,21 @@ exports.getAllPasswords = async (req, res) => {
             });
         }
 
+        const decryptedPasswords = user.passwordStorage.storage.map(item => {
+            return {
+                ...item._doc, // spread the original document
+                password: HashManager.decrypt(item.password)
+            };
+        });
+
         return res.status(200).json({
             success: true,
-            data: user.passwordStorage.storage
+            data: decryptedPasswords
         });
     } catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
-
 
 
 exports.searchPasswords = async (req, res) => {
