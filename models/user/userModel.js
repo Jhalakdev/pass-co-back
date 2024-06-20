@@ -137,10 +137,8 @@ const userSchema = new Schema(
         },
         paymentHistory: [
             {
-              orderId:{
                 type:mongoose.Types.ObjectId,
                 ref:"Order"
-              }
             }
           ]
     },

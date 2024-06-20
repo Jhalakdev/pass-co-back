@@ -70,7 +70,7 @@ exports.getAUser = async (req, res) => {
     }
 
     // Fetch the user's payment history
-    const paymentHistory = await Order.find({ _id: { $in: user.paymentHistory.orderId.map(ph => ph.orderId) } });
+    const paymentHistory = await Order.find({ _id: { $in: user.paymentHistory.map(ph => ph.orderId) } });
 
     return res.status(200).json({
       success: true,
