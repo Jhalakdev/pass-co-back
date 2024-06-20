@@ -8,11 +8,17 @@ exports.userAuth = async (req, res, next) => {
   const token = req.cookies?.accessToken || req.cookies?.adminToken || req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
 
-          return res.json("Invalid Authorization");
+          return res.status(401).json({
+			succes:false,
+			message:"Invalid Authorization,Token Not Found"
+		  });
   } else {
       await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
           if (err) {
-              console.log("Invalid Token");
+			return res.status(401).json({
+				succes:false,
+				message:"Invalid Authorization,Token Not Found"
+			  });
           } else {
               req.user = decoded;
               next();

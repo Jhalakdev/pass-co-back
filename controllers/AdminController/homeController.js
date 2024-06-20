@@ -84,3 +84,23 @@ exports.getAUser = async (req, res) => {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 };
+
+exports.getAllOrder=async(req,res)=>{
+  try{
+    const order=await Order.find();
+    if(!order)
+      {
+        return res.status(400).json({
+          succes:false,
+          message:"No Order"
+        })
+      }
+      return res.status(201).json({
+        succes:true,
+        totalOrder:order.length,
+        order
+      })
+  }catch (err) {
+    return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+  }
+}
