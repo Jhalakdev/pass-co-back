@@ -12,7 +12,7 @@ router.put("/update-plan/:id",userAuth,isAdmin,upload.fields([{
 }]),planController.updatePlan)
 router.delete("/delete-plan/:id",userAuth,isAdmin,planController.deletePlan)
 
-router.get("/getAPlan",userAuth,planController.getAPlan)
+router.get("/getAPlan/:id",userAuth,planController.getAPlan)
 router.get("/getAllPlan",userAuth,planController.getAllPlan)
 
 module.exports = router;

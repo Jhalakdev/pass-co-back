@@ -336,6 +336,10 @@ exports.paymentSuccess = async (req, res) => {
         }
         await user.save();
 
+        //save payment to databse
+        user.paymentHistory.push({ orderId: order._id });
+        await user.save();
+
         // Create a storage folder for the user if it doesn't exist
         const storageZoneName = process.env.BUNNY_ZONE_NAME;
         const folderName = user._id.toString();

@@ -140,10 +140,7 @@ const userSchema = new Schema(
               orderId:{
                 type:mongoose.Types.ObjectId,
                 ref:"Order"
-              },
-              amount: Number,
-              currency: "string",
-              paymentDate: Date
+              }
             }
           ]
     },

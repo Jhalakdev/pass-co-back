@@ -54,10 +54,12 @@ exports.getAllUser=async(req,res)=>{
 exports.getAUser = async (req, res) => {
   try {
     const userId = req.params.id;
+
+    // Fetch the user along with family and friends
     const user = await User.findById(userId).select('-password').populate({
       path: 'familyAndFriends.members',
       select: '_id name plan'
-    },);
+    });
 
     if (!user) {
       return res.status(404).json({
@@ -67,10 +69,16 @@ exports.getAUser = async (req, res) => {
       });
     }
 
+    // Fetch the user's payment history
+    const paymentHistory = await Order.find({ _id: { $in: user.paymentHistory.orderId.map(ph => ph.orderId) } });
+
     return res.status(200).json({
       success: true,
       message: "User found",
-      data: user
+      data: { 
+        user, 
+        paymentHistory 
+      }
     });
   } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);

@@ -34,10 +34,23 @@ exports.updateCoupen=async(req,res)=>{
     const {name,discount,planId,expireIn}=req.body;
     const coupenId=req.params.id;
     const coupen=await Coupen.findByIdAndUpdate(coupenId,{name,discount},{new:true});
+    if(!coupen)
+      {
+        return res.status(401).json({
+          succes:false,
+          message:"Coupon Not found"
+        })
+      }
     if(planId){
       const plan= await Plan.findById(planId);
       coupen.plan=plan.name;
     }
+    await coupen.save();
+    return res.status(201).json({
+      succes:false,
+      message:"Coupon Updated successfully",
+      coupen
+    })
   }catch (err) {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
@@ -48,6 +61,13 @@ exports.deleteCoupen=async(req,res)=>{
   try{
     const coupenId=req.params.id;
     const coupen=await Coupen.findByIdAndDelete(coupenId);
+    if(!coupen)
+      {
+        return res.status(401).json({
+          succes:false,
+          message:"Coupon Not found"
+        })
+      }
     return res.status(201).json({
       success:true,
       message:"Coupen deleted successfully"
@@ -58,11 +78,10 @@ exports.deleteCoupen=async(req,res)=>{
 }
 
 //get a coupen
-
 exports.getACoupen=async(req,res)=>{
   try{
     const coupenId=req.params.id;
-    const coupen=await Coupen.findByIdAndDelete(coupenId);
+    const coupen=await Coupen.findById(coupenId);
     if(!coupen)
       {
         return res.status(400).json({
@@ -100,3 +119,4 @@ exports.getAllCoupen=async(req,res)=>{
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 }
+

@@ -181,10 +181,10 @@ exports.searchCompany = async (req, res) => {
       const { sortBy } = req.query;
       let sortOption = {};
       switch (sortBy) {
-        case "name_asc":
+        case "asc":
           sortOption = { name: 1 };
           break;
-        case "name_desc":
+        case "desc":
           sortOption = { name: -1 };
           break;
         default:
