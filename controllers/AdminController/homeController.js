@@ -72,6 +72,17 @@ exports.getAUser = async (req, res) => {
     // Fetch the user's payment history
     const paymentHistory = await Order.find({ _id: { $in: user.paymentHistory.map(ph => ph.orderId) } });
 
+    if (paymentHistory.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "User found, but no payment history",
+        data: { 
+          user, 
+          paymentHistory: [] 
+        }
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "User found",
@@ -84,6 +95,7 @@ exports.getAUser = async (req, res) => {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
 };
+
 
 exports.getAllOrder=async(req,res)=>{
   try{
