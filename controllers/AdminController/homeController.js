@@ -1,6 +1,6 @@
 const helper = require("../../helper/helper");
-const User=require("../../models/user/userModel")
-
+const User=require("../../models/user/userModel");
+const Order=require("../../models/user/orderModel");
 exports.blockUser=async(req,res)=>{
     try{
     const userId=req.body.userId
