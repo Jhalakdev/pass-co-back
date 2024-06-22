@@ -154,12 +154,13 @@ exports.getSinglePassword = async (req, res) => {
         }
 
         const decryptedPassword = await HashManager.decrypt(passwordStorage.password);
-    
+        const company=await Company.findOne({name:passwordStorage?.companyName});
         return res.status(200).json({
             success: true,
             data: {
                 ...passwordStorage.toObject(),
-                password: decryptedPassword
+                password: decryptedPassword,
+                comapany:company
             }
         });
     } catch (err) {
