@@ -181,12 +181,17 @@ exports.getAllPasswords = async (req, res) => {
             });
         }
 
-        const decryptedPasswords = user.passwordStorage.storage.map(item => {
+        const decryptedPasswords = await Promise.all(user.passwordStorage.storage.map(async (item) => {
+            const companyLogo = await Company.findOne({ name: item.companyName });
+            const image = companyLogo ? companyLogo.image : null;
+            const decryptedPassword = await HashManager.decrypt(item.password); // Assuming decrypt is an async function
+
             return {
                 ...item._doc, // spread the original document
-                password: HashManager.decrypt(item.password)
+                password: decryptedPassword,
+                image
             };
-        });
+        }));
 
         return res.status(200).json({
             success: true,
@@ -196,7 +201,6 @@ exports.getAllPasswords = async (req, res) => {
         return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
     }
 };
-
 
 exports.searchPasswords = async (req, res) => {
     try {
