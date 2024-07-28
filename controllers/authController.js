@@ -6,7 +6,7 @@ const { sendForgetPasswordOtp } = require("../utils/Twlio");
 const uploadOnCloudinary = require("../utils/cloudinary");
 const { OAuth2Client } = require('google-auth-library');
 const { sendNotification, notificationMessages } = require("../config/firebase");
-const client = new OAuth2Client('724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com');
+const client = new OAuth2Client('1016302758785-0k77rgm4161kansiinru4md4loms4em5.apps.googleusercontent.com');
 
 
 function validateEmail(input) {
@@ -476,7 +476,7 @@ exports.googleSignup=async(req,res)=> {
   try {
     let ticket = await client.verifyIdToken({
       idToken: token,
-      audience: '724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com',
+      audience: '1016302758785-0k77rgm4161kansiinru4md4loms4em5.apps.googleusercontent.com',
   });
 
   let payload = ticket.getPayload();
@@ -528,7 +528,7 @@ exports.googleLogin=async(req,res)=> {
   try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: '724294467494-qu06qgv3f5nmai710jtsqpiiurj015ts.apps.googleusercontent.com',
+      audience: '1016302758785-0k77rgm4161kansiinru4md4loms4em5.apps.googleusercontent.com',
   });
 
   const payload = ticket.getPayload();
