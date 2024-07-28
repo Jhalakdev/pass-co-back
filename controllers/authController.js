@@ -438,8 +438,8 @@ exports.updateProfileImage=async(req,res)=>{
           message: "User not found",
         });
       }
-      // const { title, message } = notificationMessages.profilePhotoUpdated;
-      // await sendNotification(user?.fcmToken, title, message,res);
+      const { title, message } = notificationMessages.profilePhotoUpdated;
+      await sendNotification(user?.fcmToken, title, message,res);
       res.status(201).json({
         success: true,
         data: user.profilePhoto,

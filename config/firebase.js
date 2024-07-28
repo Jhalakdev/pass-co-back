@@ -18,6 +18,7 @@ exports.verifyGoogleToken = async (idToken) => {
 };
 
 exports.sendNotification=async(fcmToken,message,title,res)=>{
+  
  try{
   const messaging = admin.messaging()
   let payload = {
