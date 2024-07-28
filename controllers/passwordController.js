@@ -309,7 +309,8 @@ exports.importPasswords = async (req, res) => {
                 username: decryptedPasswordData.username,
                 email: decryptedPasswordData.email,
                 password: decryptedPasswordData.password,
-                notes: decryptedPasswordData.notes
+                notes: decryptedPasswordData.notes,
+                image:companyExist.image
             });
 
             user.passwordStorage.storage.push(passwordStorage._id);
