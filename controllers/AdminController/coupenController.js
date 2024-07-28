@@ -117,12 +117,12 @@ exports.getACoupen = async (req, res) => {
 exports.getAllCoupen = async (req, res) => {
   try {
     const currentDate = new Date();
-    const coupens = await Coupen.find({
+    const coupen = await Coupen.find({
       expiryIn: { $gt: currentDate },
       usageLimit: { $gt: 0 },
     });
 
-    if (!coupens || coupens.length === 0) {
+    if (!coupen || coupen.length === 0) {
       return res.status(400).json({
         success: false,
         message: "No valid or active coupons found",
@@ -132,7 +132,7 @@ exports.getAllCoupen = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Coupons Found",
-      coupens,
+      coupen,
     });
   } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
