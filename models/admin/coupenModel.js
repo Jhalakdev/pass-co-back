@@ -7,8 +7,8 @@ const couponSchema = new mongoose.Schema({
     unique: true,
     uppercase: true,
   },
-  plan:{
-   type:String,
+  plan: {
+    type: String,
   },
   expiryIn: {
     type: Date,
@@ -17,22 +17,21 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  usageLimit:{
-    type:Number,
-    required:true
+  usageLimit: {
+    type: Number,
+    required: true,
   },
-  usageCount:{
-    type:Number,
-    default:0
-  }
-},{timestamps:true});
+  usageCount: {
+    type: Number,
+    default: 0,
+  },
+}, { timestamps: true });
 
-couponSchema.methods.setExpire =async function(days) {
+couponSchema.methods.setExpire = async function (days) {
   const now = new Date();
-  const expiresInDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000); 
+  const expiresInDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
   this.expiryIn = expiresInDate;
 };
-
 
 module.exports = mongoose.model("Coupon", couponSchema);
