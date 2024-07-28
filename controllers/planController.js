@@ -308,6 +308,7 @@ exports.paymentSuccess = async (req, res) => {
         user.paymentHistory.push(order._id);
 
         const plan = await Plan.findById(planId);
+        
         if (!plan) {
             return res.status(404).json({
                 success: false,
@@ -337,7 +338,7 @@ exports.paymentSuccess = async (req, res) => {
         await user.save();
 
         //save payment to databse
-        user.paymentHistory.push({ orderId: order._id });
+        user.paymentHistory.push(order._id );
         await user.save();
 
         // Create a storage folder for the user if it doesn't exist
