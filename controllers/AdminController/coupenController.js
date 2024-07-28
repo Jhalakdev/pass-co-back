@@ -4,8 +4,8 @@ const Plan=require("../../models/admin/planModel")
 //Create Coupens
 exports.createCoupen=async(req,res)=>{
     try{
-        const {name,expireIn,discount,planId}=req.body
-        if(!name || !expireIn || !discount)
+        const {name,expireIn,discount,planId,usageLimit}=req.body
+        if(!name || !expireIn || !discount || usageLimit)
             {
                 return res.status(400).json({
                     success:false,
@@ -14,7 +14,7 @@ exports.createCoupen=async(req,res)=>{
             }
       const plan=await Plan.findById(planId)
       const coupen=await Coupen.create({
-        name,discount,plan:plan.name
+        name,discount,plan:plan.name,usageLimit
       });
       await coupen.setExpire(expireIn);
       await coupen.save();
@@ -31,9 +31,9 @@ exports.createCoupen=async(req,res)=>{
 //Update Coupens
 exports.updateCoupen=async(req,res)=>{
   try{
-    const {name,discount,planId,expireIn}=req.body;
+    const {name,discount,planId,expireIn,usageLimit}=req.body;
     const coupenId=req.params.id;
-    const coupen=await Coupen.findByIdAndUpdate(coupenId,{name,discount},{new:true});
+    const coupen=await Coupen.findByIdAndUpdate(coupenId,{name,discount,usageLimit},{new:true});
     if(!coupen)
       {
         return res.status(401).json({

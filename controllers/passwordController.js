@@ -228,3 +228,101 @@ exports.searchPasswords = async (req, res) => {
 };
 
 
+exports.exportPasswords = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const user = await User.findById(userId).populate('passwordStorage.storage');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+
+        // Encrypt each field in each password object
+        const encryptedPasswords = await Promise.all(user.passwordStorage.storage.map(async item => {
+            return {
+                companyName: await HashManager.encrypt(item.companyName),
+                username: await HashManager.encrypt(item.username),
+                email: await HashManager.encrypt(item.email),
+                password: item.password,  // Password is already encrypted
+                notes: await HashManager.encrypt(item.notes),
+                
+            };
+        }));
+
+        return res.status(200).json({
+            success: true,
+            passwords: encryptedPasswords
+        });
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+};
+
+
+exports.importPasswords = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { passwords } = req.body;
+
+        if (!passwords || !Array.isArray(passwords)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid passwords format"
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found"
+            });
+        }
+
+        // Decrypt and import passwords
+        for (let encryptedPassword of passwords) {
+            const {companyName, username, email, password, notes } = encryptedPassword;
+
+            const decryptedPasswordData = {
+                companyName: await HashManager.decrypt(companyName),
+                username: await HashManager.decrypt(username),
+                email: await HashManager.decrypt(email),
+                password,  // Password is already decrypted
+                notes: await HashManager.decrypt(notes),
+
+            };
+
+            const companyExist = await Company.findOne({ name: decryptedPasswordData.companyName });
+            if (!companyExist) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Company ${decryptedPasswordData.companyName} Not Found`
+                });
+            }
+
+            const passwordStorage = await PassKey.create({
+                userId,
+                companyName: decryptedPasswordData.companyName,
+                username: decryptedPasswordData.username,
+                email: decryptedPasswordData.email,
+                password: decryptedPasswordData.password,
+                notes: decryptedPasswordData.notes
+            });
+
+            user.passwordStorage.storage.push(passwordStorage._id);
+            user.passwordStorage.total += 1;
+        }
+
+        await user.save();
+
+        return res.status(201).json({
+            success: true,
+            message: "Passwords Imported Successfully"
+        });
+    } catch (err) {
+        return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
+    }
+};

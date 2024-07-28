@@ -17,6 +17,14 @@ const couponSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  usageLimit:{
+    type:Number,
+    required:true
+  },
+  usageCount:{
+    type:Number,
+    default:0
+  }
 },{timestamps:true});
 
 couponSchema.methods.setExpire =async function(days) {
