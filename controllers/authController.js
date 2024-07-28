@@ -451,25 +451,42 @@ exports.updateProfileImage=async(req,res)=>{
 }
 
 
-exports.getUser=async(req,res)=>{
-  try{
-    const userId=req?.user?._id;
-    const user=await User.findById(userId).select('name email mobile profilePhoto isBlocked fileshare plan passwordStorage token fcmToken');
-    if(!user)
-      {
-        return res.status(401).json({
-          succes:false,
-          message:"Invalid Route"
-        })
-      }
-      return res.status(201).json({
-        succes:true,
-        data:user
+exports.getUser = async (req, res) => {
+  try {
+    const userId = req?.user?._id;
+    const user = await User.findById(userId)
+      .select('name email mobile profilePhoto isBlocked fileshare plan passwordStorage token fcmToken')
+      .populate({
+        path: 'plan.originalPlan.planId',
+        select: 'name'
       })
-  }catch (err) {
+      .populate({
+        path: 'plan.planId',
+        select: 'name'
+      });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Route"
+      });
+    }
+
+    // Handle FREE plan if plan.planId is null
+    const userData = user.toObject();
+    if (!userData.plan.planId) {
+      userData.plan.planId = { name: "FREE" };
+    }
+
+    return res.status(201).json({
+      success: true,
+      data: userData
+    });
+  } catch (err) {
     return helper.sendError(err.statusCode || 500, res, { error: err.message }, req);
   }
-}
+};
+
 
 exports.googleSignup=async(req,res)=> {
   let { token } = req.body;
