@@ -350,7 +350,7 @@ exports.paymentSuccess = async (req, res) => {
             await createFolder(storageZoneName, folderName, storageZonePassword);
         }
         const { title, message } = notificationMessages.paymentSuccess;
-        await sendNotification(user?.fcmToken, title, message,res);
+        await sendNotification(user,user?.fcmToken, title, message,res);
         return res.status(200).json({
             success: true,
             message: "Payment successful and plan updated"

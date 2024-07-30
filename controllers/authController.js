@@ -395,7 +395,7 @@ exports.changePassword = async (req, res) => {
           { password: hashedpassword }
         );
         const { title, message } = notificationMessages.changePassword;
-        await sendNotification(user?.fcmToken, title, message,res);
+        await sendNotification(user,user?.fcmToken, title, message,res);
         res.status(201).json({
           success: true,
           message: "Password Changed Successfully"
@@ -439,7 +439,7 @@ exports.updateProfileImage=async(req,res)=>{
         });
       }
       const { title, message } = notificationMessages.profilePhotoUpdated;
-      await sendNotification(user?.fcmToken, title, message,res);
+      await sendNotification(user,user?.fcmToken, title, message,res);
       res.status(201).json({
         success: true,
         data: user.profilePhoto,

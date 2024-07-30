@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const notification=require("../models/notificationModel");
 const serviceAccount = require('./serviceAccountKey.json');
 
 // Initialize Firebase Admin SDK
@@ -17,8 +18,8 @@ exports.verifyGoogleToken = async (idToken) => {
   }
 };
 
-exports.sendNotification=async(fcmToken,message,title,res)=>{
-  
+exports.sendNotification=async(user,fcmToken,message,title,res)=>{
+  const userId=user._id;
  try{
   const messaging = admin.messaging()
   let payload = {
@@ -30,15 +31,15 @@ exports.sendNotification=async(fcmToken,message,title,res)=>{
       };
 
 
-  messaging.send(payload)
-  .then((result) => {
-      console.log("Message Sent Successfully");
+  await messaging.send(payload)
+  .then(async(result) => {
+    console.log('Successfully sent message');
+      await notification.create({
+          userId,fcmToken,message,title
+      })
   })
  }catch(err){
-  return res.status(500).json({
-    succes:false,
-    message:"Internal Server error"
-  })
+  console.log("Message Not Sent")
  }
 }
 

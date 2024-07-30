@@ -21,7 +21,8 @@ const homeRoute=require("./routes/AdminRoutes/homeRoute.js");
 const passwordManage=require("./routes/passwordManage.js");
 const fileManager=require("./routes/fileManager.js");
 const coupen=require("./routes/AdminRoutes/coupen.js");
-const cardRoutes=require("./routes/card.js")
+const cardRoutes=require("./routes/card.js");
+const notificationRoute=require("./routes/notification.js")
 // All Middlewares
 const app = express();
 
@@ -55,7 +56,7 @@ app.use("/admin/v1/company",companyRoute);
 app.use("/admin/v1/plan",planRoutes);
 app.use("/admin/v1/api",homeRoute);
 app.use("/admin/v1/coupen",coupen);
-
+app.use("/admin/v1/notification",notificationRoute)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;

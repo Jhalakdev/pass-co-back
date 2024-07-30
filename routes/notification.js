@@ -1,9 +1,10 @@
 const express = require('express');
-const { userAuth } = require('../middlewares/authMiddleware');
+const { userAuth ,isAdmin} = require('../middlewares/authMiddleware');
 const notificationController = require('../controllers/notificationController');
 
 const router = express.Router();
 
-router.post("/get-fcm",userAuth,notificationController.saveFCMToken);
+router.get("/get-notification",userAuth,notificationController.getMyNotification);
+router.get("/",isAdmin,userAuth,notificationController.getMyNotification);
 
 module.exports = router;
