@@ -56,7 +56,7 @@ app.use("/admin/v1/company",companyRoute);
 app.use("/admin/v1/plan",planRoutes);
 app.use("/admin/v1/api",homeRoute);
 app.use("/admin/v1/coupen",coupen);
-app.use("/admin/v1/notification",notificationRoute)
+app.use("/api/v1/notification",notificationRoute)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
